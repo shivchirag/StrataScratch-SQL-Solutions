@@ -1,0 +1,8 @@
+with cte as (
+    select games, count(distinct id) as total_athletes
+    from olympics_athletes_events
+    group by games
+)
+select games, total_athletes
+from cte
+where total_athletes = (select max(total_athletes) from cte);
