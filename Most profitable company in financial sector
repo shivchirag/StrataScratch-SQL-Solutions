@@ -1,0 +1,10 @@
+with cte as (
+    select sector, max(profits) as profits
+    from forbes_global_2010_2014
+    group by sector
+    having sector = 'Financials'
+)
+select company, continent
+from forbes_global_2010_2014
+where sector = 'Financials' 
+and profits = (select profits from cte);
