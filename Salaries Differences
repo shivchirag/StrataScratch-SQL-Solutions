@@ -1,0 +1,19 @@
+with cte as (
+    select d1.id, salary, department_id, department
+    from db_employee d1
+    join db_dept d2
+    on d1.department_id = d2.id
+),
+cte1 as (
+    select max(salary) as marketing
+    from cte
+    where department = 'marketing'
+),
+cte2 as (
+    select max(salary) as engineering
+    from cte
+    where department = 'engineering'
+)
+select abs(marketing - engineering)
+from cte1
+cross join cte2
