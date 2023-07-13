@@ -1,0 +1,23 @@
+with voted_no_of_candidates as (
+    select voter, candidate, count(*) over(partition by voter) as voted_n_candidates
+    from (select * 
+        from voting_results
+        where candidate is not null) as i
+),
+votes_to_candidates as (
+    select *, round((1.0/voted_n_candidates),3) as vote_count
+    from voted_no_of_candidates
+),
+candidates_votes as (
+    select candidate, sum(vote_count) as total_votes_recieved
+    from votes_to_candidates
+    group by candidate
+    order by sum(vote_count) desc
+),
+rankings as (
+    select *, rank() over(order by total_votes_recieved desc) as rnk
+    from candidates_votes
+)
+select candidate
+from rankings
+where rnk = 1;
