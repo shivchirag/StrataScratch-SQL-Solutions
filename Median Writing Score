@@ -1,0 +1,4 @@
+select id
+from sat_scores
+where average_sat = (select percentile_cont(0.50) within group(order by average_sat) 
+from sat_scores);
