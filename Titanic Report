@@ -1,0 +1,18 @@
+with non_survivors as (
+    select 0 as survived, 
+    sum(case when pclass = 1 and survived = 0 then 1 else 0 end) as first_class,
+    sum(case when pclass = 2 and survived = 0 then 1 else 0 end) as second_class,
+    sum(case when pclass = 3 and survived = 0 then 1 else 0 end) as third_class
+    from titanic),
+survivors as (
+    select 1 as survived, 
+    sum(case when pclass = 1 and survived = 1 then 1 else 0 end) as first_class,
+    sum(case when pclass = 2 and survived = 1 then 1 else 0 end) as second_class,
+    sum(case when pclass = 3 and survived = 1 then 1 else 0 end) as third_class
+    from titanic
+)
+select *
+from non_survivors
+union
+select * 
+from survivors;
