@@ -1,0 +1,30 @@
+with cte as(
+    select user_id, timestamp::date as date, timestamp::time as time, action
+    from facebook_web_log
+),
+cte1 as (
+    select user_id, date, max(time) as latest_page_load
+    from cte
+    where action = 'page_load'
+    group by user_id, date
+),
+cte2 as (
+    select user_id, date, min(time) as earliest_page_exit
+    from cte
+    where action = 'page_exit'
+    group by user_id, date
+),
+cte3 as (
+    select t1.user_id, t1.date, t1.latest_page_load, t2.earliest_page_exit
+    from cte1 t1
+    join cte2 t2
+    on t1.user_id = t2.user_id
+    and t1.date = t2.date
+),
+cte4 as (
+    select user_id, date, (earliest_page_exit - latest_page_load) as time_spent
+    from cte3
+)
+select user_id, avg(time_spent) as average_session_time
+from cte4
+group by user_id;
