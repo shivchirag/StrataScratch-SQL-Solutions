@@ -1,0 +1,11 @@
+with cte as (
+    select user1, user2
+    from facebook_friends
+    union all
+    select user2, user1
+    from facebook_friends
+)
+select user1, count(user2)::float/(select count(distinct user1) from cte)*100 as popularity_percentage
+from cte
+group by 1
+order by 1;
