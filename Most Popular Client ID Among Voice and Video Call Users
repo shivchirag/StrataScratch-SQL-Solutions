@@ -1,0 +1,29 @@
+with cte as (
+    select client_id, user_id, 
+    sum(case when event_type in ('video call received', 'video call sent', 'voice call received', 'voice call sent') then 1 else 0 end) as prefered_event_type,
+    count(event_type) as total_event_type
+    from fact_events
+    group by 1,2
+),
+cte1 as (
+    select *, (prefered_event_type::float/total_event_type) as prefered_event_type_ratio
+    from cte
+),
+cte2 as (
+    select client_id, user_id, count(*) as total
+    from cte1
+    where prefered_event_type_ratio>=0.5
+    group by 1,2
+),
+cte3 as (
+    select client_id, sum(total) as client_total
+    from cte2
+    group by 1
+),
+cte4 as (
+    select *, rank() over(order by client_total desc) as rnk
+    from cte3
+)
+select client_id
+from cte4
+where rnk=1;
