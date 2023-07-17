@@ -1,0 +1,17 @@
+with cte as (
+    select * 
+    from user_flags u
+    join flag_review f
+    on u.flag_id = f.flag_id
+    where f.reviewed_by_yt = TRUE
+    and f.reviewed_outcome = 'APPROVED'
+),
+cte1 as (
+    select (user_firstname || ' ' || user_lastname) as username, count(distinct video_id), rank() over(order by count(distinct video_id) desc) as rnk
+    from cte
+    group by 1
+    order by 2 desc
+)
+select username 
+from cte1
+where rnk = 1;
