@@ -1,0 +1,19 @@
+with cte as (
+    select 'bull' as word, count(*) as no_of_occurences
+    from google_file_store
+    where contents like '% bull %'
+    or contents like 'bull %'
+    or contents like '% bull'
+),
+cte1 as (
+    select 'bear' as word, count(*) as no_of_occurences
+    from google_file_store
+    where contents like '% bear %'
+    or contents like 'bear %'
+    or contents like '% bear'   
+)
+select * 
+from cte
+union all
+select *
+from cte1;
