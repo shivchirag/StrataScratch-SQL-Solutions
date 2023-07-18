@@ -1,0 +1,15 @@
+with cte as (
+    select first_name, order_date, total_order_cost
+    from customers c
+    join orders o
+    on c.id = o.cust_id
+),
+cte1 as (
+    select first_name, order_date, sum(total_order_cost) as daily_total_order_cost
+    from cte
+    group by 1,2
+    order by 3
+)
+select first_name, daily_total_order_cost, order_date
+from cte1
+where daily_total_order_cost = (select max(daily_total_order_cost) from cte1);
