@@ -1,0 +1,13 @@
+with cte as (
+    select o.id as order_id, o.order_date, o.order_details, o.total_order_cost, c.* 
+    from orders o
+    join customers c
+    on o.cust_id = c.id
+),
+cte1 as (
+    select count(distinct order_id) as no_of_shipable_orders
+    from cte
+    where (address is not null)
+)
+select ((no_of_shipable_orders::float/(select (count (distinct id)) from orders))*100) as percentage_of_shipable_orders
+from cte1;
