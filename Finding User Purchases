@@ -1,0 +1,27 @@
+with cte as (   
+    select user_id, count(distinct created_at) as no_of_transactions
+    from amazon_transactions
+    group by 1
+    order by 1
+),
+cte1 as (
+    select user_id, item, created_at, revenue
+    from amazon_transactions
+    where user_id in (select user_id from cte)
+    order by 1, 3
+),
+cte2 as (
+    select user_id, 
+        created_at, 
+        lead(created_at) over (partition by user_id order by created_at) as next_transaction_date
+    from cte1
+),
+cte3 as (
+    select user_id, created_at, next_transaction_date,
+        (case when (next_transaction_date is not null) and 
+        (next_transaction_date - created_at)<8 then 1 else 0 end) as returning_user
+    from cte2
+)
+select distinct user_id 
+from cte3
+where returning_user = 1;
