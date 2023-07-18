@@ -1,0 +1,27 @@
+with cte as (
+    select p.id as project_id, p.title, p.budget, p.start_date, p.end_date,
+    ep.emp_id, e.first_name, e.last_name, e.salary
+    from linkedin_projects p
+    join linkedin_emp_projects ep
+    on p.id = ep.project_id
+    join linkedin_employees e
+    on ep.emp_id = e.id
+), 
+cte1 as (
+    select *, (end_date - start_date) as duration
+    from cte
+),
+cte2 as (
+    select project_id, title, budget, emp_id, first_name, last_name, 
+    salary, ((duration::float/365)*salary) as expense_on_emp
+    from cte1
+),
+cte3 as (
+    select title, budget, ceiling(sum(expense_on_emp)) as total_emp_expense
+    from cte2
+    group by 1,2
+    order by 1
+)
+select title, budget, total_emp_expense 
+from cte3
+where total_emp_expense>budget;
