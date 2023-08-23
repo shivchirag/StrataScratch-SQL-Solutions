@@ -1,0 +1,12 @@
+with cte as (
+    select w.*, t.worker_title, t.affected_from
+    from worker w
+    join title t
+    on w.worker_id = t.worker_ref_id
+)
+select worker_title as best_paid_title 
+from cte
+where salary = (
+    select max(salary)
+    from cte
+);
