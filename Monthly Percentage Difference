@@ -1,0 +1,20 @@
+with cte as (
+    select to_char(created_at, 'yyyy-mm') as year_month, created_at, value, purchase_id
+    from sf_transactions
+),
+cte1 as (
+    select year_month, sum(value) as revenue
+    from cte
+    group by 1
+    order by 1
+),
+cte2 as (
+    select year_month, lag(revenue) over() as previous_month, revenue
+    from cte1
+),
+cte3 as (
+    select year_month, case when previous_month is null then null else ((revenue-previous_month)/previous_month)*100 end as revenue_diff_pct
+    from cte2
+)
+select year_month, round(revenue_diff_pct, 2)
+from cte3;
