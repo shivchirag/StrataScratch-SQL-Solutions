@@ -1,0 +1,23 @@
+with cte as (
+    select o.*, m.*
+    from order_details o
+    join merchant_details m
+    on o.merchant_id = m.id
+),
+cte1 as (
+    select to_char(order_timestamp::date,'yyyy-mm-dd') as date, *
+    from cte
+),
+cte2 as (
+    select date, name, count(*) as no_of_orders
+    from cte1
+    group by 1,2
+    order by 1 asc, 3 desc
+),
+cte3 as (
+    select date, name, no_of_orders, dense_rank() over(partition by date order by no_of_orders desc) as rnk
+    from cte2
+)
+select date, name, rnk
+from cte3
+where rnk<=3;
