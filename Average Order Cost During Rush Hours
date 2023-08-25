@@ -1,0 +1,18 @@
+with cte as (
+    select *, (order_total - discount_amount + tip_amount - refunded_amount) as net_order_total
+    from doordash_delivery
+),
+cte1 as (
+    select extract(isodow from customer_placed_order_datetime) as weekday, extract(hour from customer_placed_order_datetime) as hour, *
+    from cte
+),
+cte2 as (
+    select weekday, hour, delivery_region, avg(net_order_total) as avg_net_order_total
+    from cte1
+    group by 1,2,3
+    order by 1,2,3
+)
+select weekday, hour, round((avg_net_order_total::numeric),2)
+from cte2
+where delivery_region = 'San Jose'
+and hour in (15, 16, 17);
