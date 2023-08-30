@@ -1,0 +1,18 @@
+with cte as (
+    select state, percentile_cont (0.05) within group (order by fraud_score desc) as percentile_threshold
+    from fraud_score
+    group by state
+),
+cte1 as (
+    select f.policy_num, f.state, f.claim_cost, f.fraud_score, p.percentile_threshold
+    from cte p
+    join fraud_score f
+    on f.state = p.state
+),
+cte2 as (
+    select policy_num, state, claim_cost, fraud_score
+    from cte1
+    where fraud_score>=percentile_threshold
+)
+select *
+from cte2
