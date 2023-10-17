@@ -1,0 +1,22 @@
+with cte as (
+    select state, stars
+    from yelp_business
+),
+cte1 as (
+    select state, case when stars = 5 then 1 else 0 end as is_five_star
+    from cte
+),
+cte2 as (
+    select state, sum(is_five_star) as n_five_star
+    from cte1
+    group by 1
+    order by 2 desc, 1 asc
+),
+cte3 as (
+    select state, n_five_star, rank() over(order by n_five_star desc) as rnk
+    from cte2
+)
+select state, n_five_star 
+from cte3
+where rnk<=5
+order by n_five_star desc, state asc;
