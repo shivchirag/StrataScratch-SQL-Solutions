@@ -1,0 +1,13 @@
+with cte as (
+    select id, price, variety from winemag_p2
+    UNION ALL
+    select id, price, variety from winemag_p1
+),
+cte1 as (
+    select variety, percentile_disc(0.5)
+    within group (order by price) as median_price
+    from cte
+    group by 1
+    order by 2 desc
+)
+select * from cte1;
