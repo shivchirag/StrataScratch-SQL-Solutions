@@ -1,0 +1,5 @@
+select company_name, 
+    (count(case when year=2020 then product_name else null end) - count(case when year=2019 then product_name else null end)) as net_diff
+from car_launches
+group by 1
+order by 1;
