@@ -1,0 +1,25 @@
+with cte as (
+    select user_id_sender as sender, user_id_receiver as receiver, count(*) as cnt
+    from fb_friend_requests
+    group by 1,2
+),
+cte1 as (
+    select distinct date
+    from fb_friend_requests
+    where action = 'sent'
+),
+cte2 as (
+    select ct.sender, ct.receiver, ct.cnt, fb.date
+    from cte ct
+    join fb_friend_requests fb
+    on ct.sender = fb.user_id_sender
+    and ct.receiver = fb.user_id_receiver
+    where action = 'sent'
+),
+cte3 as (
+    select date, sum(case when cnt=2 then 1 else 0 end)::float/count(*) as percentage_acceptance
+    from cte2
+    group by 1
+    order by 1 asc
+)
+select * from cte3;
