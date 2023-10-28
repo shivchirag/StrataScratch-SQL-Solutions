@@ -1,0 +1,49 @@
+with cte as (
+    select account_id, user_id, max(date) as last_dec_2020
+    from sf_events
+    where extract(month from date)=12
+    and extract(year from date)=2020
+    group by 1,2
+    order by 1,2,3
+),
+cte1 as (
+    select account_id, user_id, max(date) as last_jan_2021
+    from sf_events
+    where extract(month from date)=1
+    and extract(year from date)=2021
+    group by 1,2
+    order by 1,2,3
+),
+cte2 as (
+    select account_id, user_id, max(date) as last_active
+    from sf_events
+    group by 1,2
+    order by 1,2,3
+),
+cte3 as (
+    select t.account_id, t.user_id, t.last_active, f.last_dec_2020, s.last_jan_2021
+    from cte2 t
+    full join cte f
+    on t.account_id = f.account_id
+    and t.user_id = f.user_id
+    full join cte1 s
+    on t.account_id = s.account_id
+    and t.user_id = s.user_id
+    order by 1,2,3
+),
+cte4 as (
+    select account_id, user_id, 
+        case when last_dec_2020 is not null and last_dec_2020 != last_jan_2021 and last_dec_2020 != last_active then 1 else 0 end as dec_coming_back,
+        case when last_dec_2020 is not null then 1 else 0 end as dec_users,
+        case when last_jan_2021 is not null and last_jan_2021 != last_active then 1 else 0 end as jan_coming_back,
+        case when last_jan_2021 is not null then 1 else 0 end as jan_users
+    from cte3
+),
+cte5 as (
+    select account_id, 1.0*sum(dec_coming_back)/sum(dec_users) as dec_retention, 1.0*sum(jan_coming_back)/sum(jan_users) as jan_retention
+    from cte4
+    group by 1
+    order by 1
+)
+select account_id, jan_retention/dec_retention as retention_rate
+from cte5;
