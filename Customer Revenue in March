@@ -1,0 +1,10 @@
+with cte as (
+    select cust_id, extract(month from order_date) as month, extract(year from order_date) as year, total_order_cost
+    from orders
+)
+select cust_id, sum(total_order_cost) as revenue
+from cte
+where month = 3
+and year = 2019
+group by 1
+order by 2 desc;
