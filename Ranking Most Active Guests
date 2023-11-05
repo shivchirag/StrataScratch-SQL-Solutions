@@ -1,0 +1,11 @@
+with cte as (
+    select id_guest, sum(n_messages) as n_messages
+    from airbnb_contacts
+    group by 1
+    order by 2 desc
+),
+cte1 as (
+    select dense_rank() over(order by n_messages desc) as ranking, id_guest, n_messages
+    from cte
+)
+select * from cte1;
