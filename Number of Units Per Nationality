@@ -1,0 +1,12 @@
+with cte as (
+    select h.host_id, h.nationality, h.age, u.unit_id
+    from airbnb_hosts h
+    join airbnb_units u
+    on h.host_id = u.host_id
+    where h.age<30
+    and u.unit_type = 'Apartment'
+)
+select nationality, count(DISTINCT unit_id) as apartment_count
+from cte
+group by 1
+order by 2 desc;
