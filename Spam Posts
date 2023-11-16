@@ -1,0 +1,19 @@
+with cte as (
+    select p.post_id, p.poster, p.post_text, p.post_keywords, p.post_date, v.viewer_id
+    from facebook_posts p
+    join facebook_post_views v
+    on p.post_id = v.post_id
+),
+cte1 as (
+    select post_date, post_id, max(case when post_keywords like '%spam%' then 1 else 0 end) as is_spam
+    from cte
+    group by 1,2
+    order by 1,2,3
+),
+cte2 as (
+    select post_date, (sum(is_spam)::numeric/count(is_spam))*100
+    from cte1
+    group by 1
+    order by 1 desc, 2
+)
+select * from cte2;
